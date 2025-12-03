@@ -17,84 +17,94 @@ Instead of each airline building their own runway, they can **share one runway**
 
 The system uses **Shapley Values** from cooperative game theory to determine a fair cost allocation that considers each airline's runway requirement and their marginal contribution to the shared infrastructure.
 
-### Example Scenario
+### Example Scenario: The Airport (Runway) Problem
 
-Consider three airlines:
-- **Airline A** needs 1,500m runway → Would cost $1.5M if built alone
-- **Airline B** needs 2,500m runway → Would cost $2.5M if built alone
-- **Airline C** needs 3,500m runway → Would cost $3.5M if built alone
+Three airlines require different runway lengths:
 
-**If they cooperate**: Build one 3,500m runway for $3.5M (saves $3.5M compared to building separately!)
+- **Airline A**: 1,500 m
+- **Airline B**: 2,500 m
+- **Airline C**: 3,500 m
 
-But how should the $3.5M be split? This is where Shapley values provide the answer.
+If each airline built separately, the total cost would be:
 
-## Why Shapley Values? (Not Simple Proportional Allocation)
+- 1,500 m → $1.5M
+- 2,500 m → $2.5M
+- 3,500 m → $3.5M
+- **Total if built alone**: $7.5M
 
-You might wonder: Why not just split costs proportionally to runway length requirements?
+If they cooperate, only one runway must be built, at the longest required length:
 
-### The Problem with Proportional Allocation
+- **Joint cost** = $3.5M
 
-Simple proportional allocation would calculate each airline's share as:
+This creates substantial savings. The question is: **How should the $3.5M be split fairly among the airlines?**
 
-```
-Share = (Airline's requirement / Total of all requirements) × Total cost
-```
+This is the classic **Airport Problem** in cooperative game theory, solved by the Shapley value.
 
-**Example with proportional split:**
-- Airline A (1,500m): (1,500/7,500) × $3.5M = **$700,000** (20%)
-- Airline B (2,500m): (2,500/7,500) × $3.5M = **$1,166,667** (33.3%)
-- Airline C (3,500m): (3,500/7,500) × $3.5M = **$1,633,333** (46.7%)
+## Why Not Split Cost Proportionally to Runway Length?
 
-### Why This is Unfair
+A proportional split based on runway requirements seems intuitive, but **it is not valid for this problem**.
 
-**Problem 1: Ignores Standalone Costs**
-- Airline A would only pay $1.5M alone, but proportional method could charge them more
-- Airline C could build their own 3,500m runway for $3.5M, so they shouldn't pay more than that
+The reason is simple: **runway length is a non-additive, nested public good.**
 
-**Problem 2: Doesn't Consider Marginal Contributions**
-- If Airline A joins a coalition with B and C, they add **zero cost** (runway is already 3,500m)
-- Proportional allocation ignores this - it treats all airlines as equally responsible
+- The cost is determined by the **maximum requirement**, not by summing individual requirements.
+- Proportional allocation incorrectly assumes that each airline contributes proportionally to the total cost, but in reality:
+  - Airlines contribute **only by increasing the maximum runway length**.
+  - Additional runway length beyond an airline's requirement provides it **no additional value**.
+  - Smaller airlines do not cause extensions beyond the larger airlines' requirements.
 
-**Problem 3: Not Coalition-Proof**
-- Airlines might prefer to form smaller coalitions
-- Example: B and C might exclude A if A's proportional share seems unfair
+Therefore, **proportional splitting does not reflect how cost is actually generated**.
 
-### How Shapley Values Fix This
+## Shapley Value: The Fair Solution
 
-Shapley values calculate each player's **marginal contribution** across all possible coalition formations:
+In the Airport Problem, the Shapley value distributes cost based on **which coalition of airlines causes each segment of the runway to be necessary**.
 
-1. **Considers all scenarios**: What happens if airlines join in different orders?
-2. **Marginal contribution**: How much does each airline increase the total cost?
-3. **Fair averaging**: Takes the average marginal contribution across all possible orderings
+**Break the 3,500 m runway into cost segments** based on requirement thresholds:
 
-**Shapley Value Calculation (simplified):**
+| Runway Segment | Length | Cost | Required by |
+|----------------|--------|------|-------------|
+| 0–1,500 m | 1,500 m | $1.5M | A, B, C |
+| 1,500–2,500 m | 1,000 m | $1.0M | B, C |
+| 2,500–3,500 m | 1,000 m | $1.0M | C |
 
-For Airline A (1,500m):
-- Joins first: Contributes $1.5M
-- Joins after B: Contributes $0 (B already needs 2,500m)
-- Joins after C: Contributes $0 (C already needs 3,500m)
-- Joins after B&C: Contributes $0
-- Average contribution ≈ **$500,000** ✅
+**Each segment is split equally among the airlines that need it.**
 
-For Airline C (3,500m):
-- Joins first: Contributes $3.5M
-- Joins after A: Contributes $2M (3,500m - 1,500m)
-- Joins after B: Contributes $1M (3,500m - 2,500m)
-- Joins after A&B: Contributes $1M
-- Average contribution ≈ **$2,000,000** ✅
+### Segment 1 (0–1,500 m)
+- **Cost**: $1.5M
+- **Users**: A, B, C
+- **Share**: $0.5M each
 
-### Key Advantages of Shapley Values
+### Segment 2 (1,500–2,500 m)
+- **Cost**: $1.0M
+- **Users**: B, C
+- **Share**: $0.5M each
 
-✅ **Efficiency**: Total cost is fully allocated (no surplus or deficit)
-✅ **Fairness**: Players with similar contributions pay similar amounts  
-✅ **Individual Rationality**: No player pays more than their standalone cost
-✅ **Null Player**: Players adding zero value pay nothing
-✅ **Additivity**: Works consistently across different cost structures
-✅ **Coalition-Proof**: No group of players benefits from excluding others
+### Segment 3 (2,500–3,500 m)
+- **Cost**: $1.0M
+- **Users**: C
+- **Share**: $1.0M
+
+### Final Shapley Value Cost Allocation
+
+| Airline | Segment 1 | Segment 2 | Segment 3 | Total |
+|---------|-----------|-----------|-----------|-------|
+| A | $0.5M | — | — | **$0.5M** |
+| B | $0.5M | $0.5M | — | **$1.0M** |
+| C | $0.5M | $0.5M | $1.0M | **$2.0M** |
+
+**Total**: $0.5M + $1.0M + $2.0M = $3.5M
+
+### Key Advantages
+
+This allocation satisfies the key Shapley axioms:
+
+✅ **Efficiency** (the full cost is allocated)  
+✅ **Symmetry** (equal treatment of equal contributors)  
+✅ **Dummy player** (those who add no extension pay nothing for it)  
+✅ **Additivity** (consistent across cost structures)
 
 ### Mathematical Guarantee
 
-The Shapley value is the **unique allocation** that satisfies all these fairness properties simultaneously. This was proven by Lloyd Shapley (Nobel Prize in Economics, 2012).
+For the Airport Problem, the Shapley value is known to be the **unique allocation rule** satisfying these fairness properties.
 
 ## Features
 
