@@ -29,15 +29,15 @@ def main():
     args = parser.parse_args()
     
     print("=" * 60)
-    print("🚀 Starting Airport Cost-Sharing Game Web Interface...")
+    print("- Starting Airport Cost-Sharing Game Web Interface...")
     print("=" * 60)
     
     if args.share:
-        print("📡 Public sharing enabled - generating shareable link...")
+        print("- Public sharing enabled - generating shareable link...")
     else:
-        print("🔒 Running locally only")
+        print("- Running locally only")
     
-    print(f"🌐 Server port: {args.port}")
+    print(f"Server port: {args.port}")
     print("=" * 60)
     
     app = GradioInterface()

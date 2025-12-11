@@ -11,7 +11,7 @@ from src.simulation.simulation_engine import SimulationEngine
 
 class GradioInterface:
     """
-    Gradio-based web interface for the Airport Cost-Sharing Game.
+    Gradio-based web interface.
     """
 
     def __init__(self):
@@ -30,7 +30,7 @@ class GradioInterface:
         """
         try:
             if num_players <= 0:
-                return "❌ Error: Number of airlines must be positive.", ""
+                return "ERROR: Number of airlines must be positive.", ""
             
             self.players = []
             player_list = []
@@ -42,13 +42,13 @@ class GradioInterface:
                 self.players.append(player)
                 player_list.append(f"{player.name}: Requires {player.cost:.0f}m runway")
             
-            status = f"✅ Successfully generated {num_players} airlines!"
+            status = f"Successfully generated {num_players} airlines!"
             players_display = "\n".join(player_list)
             
             return status, players_display
             
         except Exception as e:
-            return f"❌ Error: {str(e)}", ""
+            return f"ERROR: {str(e)}", ""
 
     def run_simulation(
         self, 
@@ -66,7 +66,7 @@ class GradioInterface:
             Tuple of (results text, matplotlib figure)
         """
         if not self.players:
-            return "⚠️ Warning: Please generate airlines first.", None
+            return "WARNING: Please generate airlines first.", None
         
         try:
             algo = AlgorithmType(algorithm)
@@ -80,16 +80,14 @@ class GradioInterface:
             
             result = self.simulation_engine.run_simulation(config)
             
-            # Format results text
             results_text = self._format_results(result)
             
-            # Create plot
             fig = self._create_plot(result)
             
             return results_text, fig
             
         except Exception as e:
-            return f"❌ Error: Simulation failed - {str(e)}", None
+            return f"ERROR: Simulation failed - {str(e)}", None
 
     def _format_results(self, result) -> str:
         """Format calculation results as readable text."""
@@ -101,12 +99,12 @@ class GradioInterface:
             "=" * 60,
             "📊 SIMULATION RESULTS",
             "=" * 60,
-            f"\n🔧 Algorithm: {result.algorithm_used.value}",
-            f"✈️  Runway Length Built: {result.total_cost:.0f} meters",
-            f"💰 Total Construction Cost: ${total_cost_dollars:,.0f}",
-            f"⏱️  Execution Time: {result.execution_time:.4f} seconds",
+            f"\n Algorithm: {result.algorithm_used.value}",
+            f" Runway Length Built: {result.total_cost:.0f} meters",
+            f" Total Construction Cost: ${total_cost_dollars:,.0f}",
+            f" Execution Time: {result.execution_time:.4f} seconds",
             "\n" + "=" * 60,
-            "📈 FAIR COST ALLOCATION (Shapley Values)",
+            " FAIR COST ALLOCATION (Shapley Values)",
             "=" * 60,
             "Each airline's fair share of the runway construction cost:",
             "",
@@ -200,7 +198,7 @@ class GradioInterface:
             
             with gr.Row():
                 with gr.Column(scale=1):
-                    gr.Markdown("## ⚙️ Configuration")
+                    gr.Markdown("## Configuration")
                     
                     num_players_slider = gr.Slider(
                         minimum=2,
@@ -212,7 +210,7 @@ class GradioInterface:
                     )
                     
                     generate_btn = gr.Button(
-                        "🎲 Generate Random Airlines",
+                        "Generate Random Airlines",
                         variant="primary",
                         size="lg"
                     )
@@ -231,7 +229,7 @@ class GradioInterface:
                     )
                     
                     gr.Markdown("---")
-                    gr.Markdown("## 🎯 Algorithm Settings")
+                    gr.Markdown("## Algorithm Settings")
                     
                     algorithm_radio = gr.Radio(
                         choices=["exact", "approximate"],
@@ -256,7 +254,7 @@ class GradioInterface:
                     )
                 
                 with gr.Column(scale=2):
-                    gr.Markdown("## 📊 Results")
+                    gr.Markdown("## Results")
                     
                     results_text = gr.Textbox(
                         label="Calculation Results",
@@ -272,17 +270,17 @@ class GradioInterface:
             gr.Markdown(
                 """
                 ---
-                ### 📚 About Shapley Values
+                ### About Shapley Values
                 
                 The **Shapley value** is a solution concept in cooperative game theory developed by 
                 Lloyd Shapley (Nobel Prize 2012). It fairly distributes costs based on each player's 
                 **marginal contribution** to all possible coalitions.
                 
                 **Key Properties:**
-                - ✅ **Efficiency**: The total cost is fully allocated (no surplus or deficit)
-                - ✅ **Fairness**: Players with similar contributions pay similar amounts
-                - ✅ **Additivity**: Contributions are evaluated across all possible scenarios
-                - ✅ **Null player**: Airlines requiring no runway pay nothing
+                - **Efficiency**: The total cost is fully allocated (no surplus or deficit)
+                - **Fairness**: Players with similar contributions pay similar amounts
+                - **Additivity**: Contributions are evaluated across all possible scenarios
+                - **Null player**: Airlines requiring no runway pay nothing
                 
                 **Why it works for airports:**  
                 If a small airline only needs 1,500m but joins others building a 3,500m runway, 
