@@ -9,7 +9,7 @@ This project implements a simulation of the **Airport Runway Cost-Sharing Proble
 Multiple airlines operate at an airport and need runways of different lengths:
 - **Small aircraft** (regional jets): Need ~1,500m runway
 - **Medium aircraft** (narrow-body): Need ~2,500m runway  
-- **Large aircraft** (wide-body): Need ~3,500m runway
+- **Large aircraft** (wide-body): Need ~3,500m runway.
 
 Instead of each airline building their own runway, they can **share one runway** that's long enough for the largest aircraft. Building a runway costs approximately **$1,000 per meter**.
 
