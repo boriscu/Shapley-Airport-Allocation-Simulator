@@ -18,43 +18,63 @@ class GradioInterface:
         self.simulation_engine = SimulationEngine()
         self.players: List[Player] = []
 
-    def generate_players(self, num_players: int) -> Tuple[str, str]:
-        """
-        Generate random players with random costs.
-        
-        Args:
-            num_players: Number of players to generate
-            
-        Returns:
-            Tuple of (status message, player list display)
-        """
+    def generate_players(self, num_players: int, algorithm: str):
         try:
             if num_players <= 0:
-                return "ERROR: Number of airlines must be positive.", ""
-            
+                return "ERROR: Number must be positive.", "", "", ""
+
+            algo = AlgorithmType(algorithm)
             self.players = []
             player_list = []
-            
-            for i in range(num_players):
-                # Generate realistic runway length requirements (1000-4000 meters)
-                runway_length = random.randint(1000, 4000)
-                player = Player(id=f"P{i+1}", name=f"Airline {i+1}", cost=float(runway_length))
-                self.players.append(player)
-                player_list.append(f"{player.name}: Requires {player.cost:.0f}m runway")
-            
-            status = f"Successfully generated {num_players} airlines!"
-            players_display = "\n".join(player_list)
-            
-            return status, players_display
-            
-        except Exception as e:
-            return f"ERROR: {str(e)}", ""
 
-    def run_simulation(
-        self, 
-        algorithm: str, 
-        num_samples: int
-    ) -> Tuple[str, Optional[plt.Figure]]:
+            if algo == AlgorithmType.CONFIGURATION_VALUE:
+                # Example runway steps for types 1..3
+                runway_steps = [1500, 2500, 3500]
+                runway_steps_text = ", ".join(map(str, runway_steps))
+
+                # generate movements with types and random code-sharing
+                airlines = [f"A{i+1}" for i in range(max(2, min(5, num_players)))]
+                codeshare_lines = []
+
+                for i in range(num_players):
+                    t = random.randint(1, 3)
+                    # pick 1 or 2 airlines for this movement
+                    k = random.choice([1, 1, 2])
+                    chosen = sorted(random.sample(airlines, k=k))
+
+                    p = Player(
+                        id=f"P{i+1}",
+                        name=f"Movement {i+1}",
+                        type=t,
+                        airlines=frozenset(chosen),
+                        cost=runway_steps[t-1]  # Set cost to allow compatibility with Exact/Approx algos
+                    )
+                    self.players.append(p)
+
+                    player_list.append(f"{p.name}: type={p.type}, airlines={','.join(chosen)}")
+                    codeshare_lines.append(f"{p.id}: {','.join(chosen)}")
+
+                status = f"Generated {num_players} movements (paper model)."
+                return status, "\n".join(player_list), runway_steps_text, "\n".join(codeshare_lines)
+
+            else:
+                # classic mode (your current behavior)
+                runway_steps_text = ""
+                codeshare_text = ""
+                for i in range(num_players):
+                    runway_length = random.randint(1000, 4000)
+                    p = Player(id=f"P{i+1}", name=f"Airline {i+1}", cost=float(runway_length))
+                    self.players.append(p)
+                    player_list.append(f"{p.name}: Requires {p.cost:.0f}m runway")
+
+                status = f"Successfully generated {num_players} airlines!"
+                return status, "\n".join(player_list), runway_steps_text, codeshare_text
+
+        except Exception as e:
+            return f"ERROR: {str(e)}", "", "", ""
+
+
+    def run_simulation(self, algorithm: str, num_samples: int, runway_steps: str, codeshare_text: str):
         """
         Run the simulation with the current players and settings.
         
@@ -70,24 +90,53 @@ class GradioInterface:
         
         try:
             algo = AlgorithmType(algorithm)
+
+            # Sync player costs with runway steps if we are using the Discrete model (players have type)
+            # This ensures that even if we run Exact/Approx, we use the potentially edited runway steps cost.
+            if self.players and all(getattr(p, "type", None) is not None for p in self.players):
+                try:
+                    steps = self._parse_steps(runway_steps)
+                    for p in self.players:
+                        if 1 <= p.type <= len(steps):
+                            p.cost = steps[p.type - 1]
+                except (ValueError, IndexError):
+                    # Fallback to existing costs if steps parsing fails or indices are off
+                    pass
+
             samples = num_samples if algo == AlgorithmType.APPROXIMATE else None
-            
-            config = GameConfiguration(
-                players=self.players,
-                algorithm=algo,
-                num_samples=samples
-            )
-            
+
+            if algo == AlgorithmType.CONFIGURATION_VALUE:
+                steps = self._parse_steps(runway_steps)
+                
+                # Only apply codeshare from text box if it's provided.
+                # Otherwise, rely on existing player attributes (if they exist).
+                if codeshare_text.strip():
+                    self._apply_codeshare(codeshare_text)
+                else:
+                    # Verify players have airlines if no text provided
+                    missing = [p.id for p in self.players if not getattr(p, "airlines", None)]
+                    if missing:
+                        return "ERROR: Missing airline mappings. Please fill 'Code-sharing' box or Regenerate.", None
+
+                config = GameConfiguration(
+                    players=self.players,
+                    algorithm=algo,
+                    num_samples=None,
+                    runway_cost_steps=steps
+                )
+            else:
+                config = GameConfiguration(
+                    players=self.players,
+                    algorithm=algo,
+                    num_samples=samples
+                )
+
             result = self.simulation_engine.run_simulation(config)
             
-            results_text = self._format_results(result)
-            
-            fig = self._create_plot(result)
-            
-            return results_text, fig
-            
+            return self._format_results(result), self._create_plot(result)
+
         except Exception as e:
-            return f"ERROR: Simulation failed - {str(e)}", None
+            return f"ERROR: {str(e)}", None
 
     def _format_results(self, result) -> str:
         """Format calculation results as readable text."""
@@ -154,6 +203,52 @@ class GradioInterface:
         
         plt.tight_layout()
         return fig
+
+    def _parse_steps(self, text: str) -> List[float]:
+        parts = [p.strip() for p in text.split(",") if p.strip()]
+        if not parts:
+            raise ValueError("Please provide runway steps like: 1500, 2500, 3500")
+        return [float(x) for x in parts]
+
+    def _apply_codeshare(self, text: str) -> None:
+        # expects lines: "P1: A1,A2"
+        mapping = {}
+        for line in text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            left, right = line.split(":", 1)
+            pid = left.strip()
+            airlines = [a.strip() for a in right.split(",") if a.strip()]
+            mapping[pid] = frozenset(airlines)
+
+        # rebuild players with updated airlines (keep type)
+        new_players = []
+        for p in self.players:
+            if p.id not in mapping:
+                raise ValueError(f"Missing code-sharing mapping for {p.id}")
+            new_players.append(
+                Player(
+                    id=p.id,
+                    name=p.name,
+                    type=p.type,
+                    airlines=mapping[p.id],
+                    cost=p.cost
+                )
+            )
+        self.players = new_players
+
+    def on_algorithm_change(self, algorithm: str):
+        algo = AlgorithmType(algorithm)
+        show_paper = (algo == AlgorithmType.CONFIGURATION_VALUE)
+        show_samples = (algo == AlgorithmType.APPROXIMATE)
+
+        return (
+            gr.update(visible=show_samples),     # samples_slider
+            gr.update(visible=show_paper),       # runway_steps_box
+            gr.update(visible=show_paper),       # codeshare_box
+        )
+
 
     def create_interface(self) -> gr.Blocks:
         """
@@ -232,10 +327,10 @@ class GradioInterface:
                     gr.Markdown("## Algorithm Settings")
                     
                     algorithm_radio = gr.Radio(
-                        choices=["exact", "approximate"],
+                        choices=["exact", "approximate", "configuration_value"],
                         value="exact",
                         label="Algorithm Type",
-                        info="Exact: Precise calculation | Approximate: Faster for many players"
+                        info="Exact/Approx: classic Shapley on runway-length game | Configuration Value: code-sharing"
                     )
                     
                     samples_slider = gr.Slider(
@@ -244,7 +339,8 @@ class GradioInterface:
                         value=1000,
                         step=100,
                         label="Samples (for Approximate)",
-                        info="More samples = higher accuracy but slower"
+                        info="More samples = higher accuracy but slower",
+                        visible=False
                     )
                     
                     run_btn = gr.Button(
@@ -252,6 +348,22 @@ class GradioInterface:
                         variant="primary",
                         size="lg"
                     )
+                    
+                    runway_steps_box = gr.Textbox(
+                        label="Runway Cost Steps c1..cT (meters)",
+                        lines=1,
+                        placeholder="Example: 1500, 2500, 3500",
+                        visible=False
+                    )
+
+                    codeshare_box = gr.Textbox(
+                        label="Code-sharing (movement -> airlines)",
+                        lines=6,
+                        placeholder="Example:\nP1: A1,A2\nP2: A1\nP3: A2,A3",
+                        visible=False
+                    )
+
+
                 
                 with gr.Column(scale=2):
                     gr.Markdown("## Results")
@@ -292,13 +404,19 @@ class GradioInterface:
             # Event handlers
             generate_btn.click(
                 fn=self.generate_players,
-                inputs=[num_players_slider],
-                outputs=[status_box, players_display]
+                inputs=[num_players_slider, algorithm_radio],
+                outputs=[status_box, players_display, runway_steps_box, codeshare_box]
+            )
+
+            algorithm_radio.change(
+                fn=self.on_algorithm_change,
+                inputs=[algorithm_radio],
+                outputs=[samples_slider, runway_steps_box, codeshare_box]
             )
             
             run_btn.click(
                 fn=self.run_simulation,
-                inputs=[algorithm_radio, samples_slider],
+                inputs=[algorithm_radio, samples_slider, runway_steps_box, codeshare_box],
                 outputs=[results_text, plot_output]
             )
         

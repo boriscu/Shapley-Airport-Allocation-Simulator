@@ -6,3 +6,4 @@ class AlgorithmType(str, Enum):
     """
     EXACT = "exact"
     APPROXIMATE = "approximate"
+    CONFIGURATION_VALUE = "configuration_value"

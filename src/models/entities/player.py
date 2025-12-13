@@ -1,12 +1,16 @@
+from typing import FrozenSet, Optional
 from pydantic import BaseModel, Field
 
 class Player(BaseModel):
-    """
-    Represents an agent (airplane) in the airport cost-sharing game.
-    """
-    id: str = Field(..., description="Unique identifier for the player")
-    name: str = Field(..., description="Human-readable name of the player")
-    cost: float = Field(..., gt=0, description="The cost or requirement associated with this player (e.g., runway length)")
+    id: str
+    name: str
+
+    # Exact and approximate airport game field
+    cost: Optional[float] = Field(None, gt=0)
+
+    # only needed for CONFIGURATION_VALUE
+    type: Optional[int] = Field(None, ge=1, description="τ(i)")
+    airlines: Optional[FrozenSet[str]] = Field(None, min_items=1)
 
     class Config:
-        frozen = True # Make instances immutable
+        frozen = True

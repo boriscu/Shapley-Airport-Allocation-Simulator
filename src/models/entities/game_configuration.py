@@ -11,5 +11,10 @@ class GameConfiguration(BaseModel):
     algorithm: AlgorithmType = Field(AlgorithmType.EXACT, description="The algorithm to use for Shapley value calculation")
     num_samples: Optional[int] = Field(None, description="Number of samples for approximate calculation (if applicable)")
 
+    # Only required for CONFIGURATION_VALUE:
+    runway_cost_steps: Optional[List[float]] = Field(
+        None, description="c1..c_|T| (c0 assumed 0). Required for CONFIGURATION_VALUE."
+    )
+
     class Config:
         frozen = True

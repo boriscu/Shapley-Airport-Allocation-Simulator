@@ -2,6 +2,7 @@ from typing import Optional
 from src.services.shapley_calculator_interface import ShapleyCalculator
 from src.services.exact_shapley_calculator import ExactShapleyCalculator
 from src.services.approximate_shapley_calculator import ApproximateShapleyCalculator
+from src.services.configuration_value_airport_calculator import ConfigurationValueAirportCalculator
 from src.models.enums.algorithm_type import AlgorithmType
 
 class CalculatorFactory:
@@ -16,5 +17,7 @@ class CalculatorFactory:
         elif algorithm == AlgorithmType.APPROXIMATE:
             samples = num_samples if num_samples is not None else 1000
             return ApproximateShapleyCalculator(num_samples=samples)
+        elif algorithm == AlgorithmType.CONFIGURATION_VALUE:
+            return ConfigurationValueAirportCalculator()
         else:
             raise ValueError(f"Unknown algorithm: {algorithm}")
