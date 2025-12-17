@@ -1,11 +1,13 @@
 import json
 from typing import Any, Dict, Optional
 
+
 class ConfigurationLoader:
     """
     Singleton Configuration Loader to manage application settings.
     """
-    _instance: Optional['ConfigurationLoader'] = None
+
+    _instance: Optional["ConfigurationLoader"] = None
     _config: Dict[str, Any] = {}
 
     def __new__(cls):
@@ -18,7 +20,7 @@ class ConfigurationLoader:
         Loads configuration from a JSON file.
         """
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 self._config = json.load(f)
         except FileNotFoundError:
             print(f"Configuration file {file_path} not found. Using defaults.")

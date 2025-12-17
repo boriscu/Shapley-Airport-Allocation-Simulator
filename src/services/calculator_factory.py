@@ -3,17 +3,22 @@ from typing import Optional
 from src.services.shapley_calculator_interface import ShapleyCalculator
 from src.services.exact_shapley_calculator import ExactShapleyCalculator
 from src.services.approximate_shapley_calculator import ApproximateShapleyCalculator
-from src.services.configuration_value_airport_calculator import ConfigurationValueAirportCalculator
+from src.services.configuration_value_airport_calculator import (
+    ConfigurationValueAirportCalculator,
+)
 
 from src.models.enums.algorithm_type import AlgorithmType
+
 
 class CalculatorFactory:
     """
     Factory to create ShapleyCalculator instances.
     """
-    
+
     @staticmethod
-    def create_calculator(algorithm: AlgorithmType, num_samples: Optional[int] = None) -> ShapleyCalculator:
+    def create_calculator(
+        algorithm: AlgorithmType, num_samples: Optional[int] = None
+    ) -> ShapleyCalculator:
         if algorithm == AlgorithmType.EXACT:
             return ExactShapleyCalculator()
         elif algorithm == AlgorithmType.APPROXIMATE:

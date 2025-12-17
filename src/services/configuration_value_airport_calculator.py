@@ -15,24 +15,29 @@ class ConfigurationValueAirportCalculator(ShapleyCalculator):
     using Theorem 4.1 (polynomial expression).
     """
 
-    def calculate(self, game: AirportGameWithCoalitionConfiguration) -> CalculationResult:
+    def calculate(
+        self, game: AirportGameWithCoalitionConfiguration
+    ) -> CalculationResult:
         start = time.time()
 
         players = game.players
         if not players:
             raise ValueError("Game has no players")
         if any(getattr(p, "type", None) is None for p in players):
-            raise ValueError("CONFIGURATION_VALUE requires Player.type for all players.")
+            raise ValueError(
+                "CONFIGURATION_VALUE requires Player.type for all players."
+            )
 
         T = max(p.type for p in players)  # |T|
         c = game.c  # c[0..T]
         if len(c) <= T:  # c includes c0, so length should be T+1
-            raise ValueError(f"game.c must include costs up to type {T}. Got length {len(c)}.")
+            raise ValueError(
+                f"game.c must include costs up to type {T}. Got length {len(c)}."
+            )
 
-        # Index players by id
         by_id = {p.id: p for p in players}
 
-        # Precompute N^a_{>=t} sizes and A_{>=t} sizes from Theorem 4.1 
+        # Precompute N^a_{>=t} sizes and A_{>=t} sizes from Theorem 4.1
         # Na_ge[a][t] = |N^a_{>=t}|
         Na_ge: Dict[str, Dict[int, int]] = {a: {} for a in game.B_a.keys()}
         A_ge_count: Dict[int, int] = {}
@@ -50,7 +55,6 @@ class ConfigurationValueAirportCalculator(ShapleyCalculator):
                     airlines_ge_t += 1
             A_ge_count[t] = airlines_ge_t
 
-        # Compute CV_i by Theorem 4.1
         cv: Dict[str, float] = {p.id: 0.0 for p in players}
 
         for p in players:
@@ -70,5 +74,5 @@ class ConfigurationValueAirportCalculator(ShapleyCalculator):
             shapley_values=cv,
             total_cost=total_cost,
             execution_time=end - start,
-            algorithm_used=AlgorithmType.CONFIGURATION_VALUE,  # add this enum value
+            algorithm_used=AlgorithmType.CONFIGURATION_VALUE,
         )

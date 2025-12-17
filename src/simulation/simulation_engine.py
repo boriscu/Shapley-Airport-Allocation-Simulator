@@ -22,6 +22,7 @@ class SimulationEngine:
         """
         Runs a single simulation based on the provided configuration.
         """
+
         self.logger.info(
             f"Starting simulation with {len(config.players)} players using {config.algorithm} algorithm."
         )
@@ -31,23 +32,27 @@ class SimulationEngine:
 
             game = AirportGameWithCoalitionConfiguration(
                 players=config.players,
-                runway_cost_steps=config.runway_cost_steps, 
+                runway_cost_steps=config.runway_cost_steps,
             )
         else:
             self._validate_classic_airport_inputs(config)
             game = AirportGame(config.players)
 
-        calculator = CalculatorFactory.create_calculator(config.algorithm, config.num_samples)
+        calculator = CalculatorFactory.create_calculator(
+            config.algorithm, config.num_samples
+        )
 
         result = calculator.calculate(game)
 
-        self.logger.info(f"Simulation completed in {result.execution_time:.4f} seconds.")
+        self.logger.info(
+            f"Simulation completed in {result.execution_time:.4f} seconds."
+        )
         return result
 
     def _validate_classic_airport_inputs(self, config: GameConfiguration) -> None:
         """
         Validates the inputs for the classic airport game.
-        """ 
+        """
 
         missing = [p.id for p in config.players if getattr(p, "cost", None) is None]
         if missing:
@@ -62,16 +67,21 @@ class SimulationEngine:
         """
 
         if not getattr(config, "runway_cost_steps", None):
-            raise ValueError("CONFIGURATION_VALUE requires config.runway_cost_steps = [c1..cT].")
+            raise ValueError(
+                "CONFIGURATION_VALUE requires config.runway_cost_steps = [c1..cT]."
+            )
 
-        missing_type = [p.id for p in config.players if getattr(p, "type", None) is None]
+        missing_type = [
+            p.id for p in config.players if getattr(p, "type", None) is None
+        ]
         if missing_type:
             raise ValueError(
                 f"CONFIGURATION_VALUE requires Player.type (τ(i)). Missing for player ids: {missing_type}"
             )
 
         missing_airlines = [
-            p.id for p in config.players
+            p.id
+            for p in config.players
             if not getattr(p, "airlines", None) or len(getattr(p, "airlines", [])) == 0
         ]
         if missing_airlines:

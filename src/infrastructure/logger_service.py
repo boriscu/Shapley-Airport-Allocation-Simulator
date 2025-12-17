@@ -2,11 +2,13 @@ import sys
 import logging
 from typing import Optional
 
+
 class LoggerService:
     """
     Singleton Logger Service to handle application logging.
     """
-    _instance: Optional['LoggerService'] = None
+
+    _instance: Optional["LoggerService"] = None
     _logger: logging.Logger
 
     def __new__(cls):
@@ -18,25 +20,28 @@ class LoggerService:
     def _initialize_logger(self):
         self._logger = logging.getLogger("AppLogger")
         self._logger.setLevel(logging.INFO)
-        
+
         # Create formatter
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+
         # Create console handler
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setLevel(logging.INFO)
         console_handler.setFormatter(formatter)
-        
+
         # Create file handler
         import os
+
         log_dir = "logs"
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
-            
+
         file_handler = logging.FileHandler(os.path.join(log_dir, "app.log"))
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
-        
+
         # Add handlers to logger
         if not self._logger.handlers:
             self._logger.addHandler(console_handler)

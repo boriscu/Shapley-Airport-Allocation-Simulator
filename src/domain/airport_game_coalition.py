@@ -3,6 +3,7 @@ from typing import Dict, List, Sequence, Set
 from src.models.entities.player import Player
 from src.domain.cooperative_game import CooperativeGame
 
+
 class AirportGameWithCoalitionConfiguration(CooperativeGame):
     """
     Airport game (N,c) enriched with coalition configuration B induced by airlines.

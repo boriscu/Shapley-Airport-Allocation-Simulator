@@ -3,6 +3,7 @@ from typing import List
 from src.models.entities.player import Player
 from src.domain.cooperative_game import CooperativeGame
 
+
 class AirportGame(CooperativeGame):
     """
     Concrete implementation of the Airport Cost-Sharing Game.
@@ -17,6 +18,6 @@ class AirportGame(CooperativeGame):
         """
         if not coalition:
             return 0.0
-        
+
         # The cost of the coalition is the maximum individual cost among its members
         return max(player.cost for player in coalition)
