@@ -1,11 +1,14 @@
 import time
 import random
-from typing import Dict, List, Optional
+from typing import List
+
 from src.services.shapley_calculator_interface import ShapleyCalculator
+
 from src.domain.cooperative_game import CooperativeGame
-from src.models.entities.calculation_result import CalculationResult
+
 from src.models.entities.player import Player
 from src.models.enums.algorithm_type import AlgorithmType
+from src.models.entities.calculation_result import CalculationResult
 
 class ApproximateShapleyCalculator(ShapleyCalculator):
     """

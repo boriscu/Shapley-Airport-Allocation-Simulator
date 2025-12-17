@@ -1,5 +1,6 @@
 from typing import Dict
 from pydantic import BaseModel, Field
+
 from src.models.enums.algorithm_type import AlgorithmType
 
 class CalculationResult(BaseModel):

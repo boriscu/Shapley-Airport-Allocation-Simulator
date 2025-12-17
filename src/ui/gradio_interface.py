@@ -1,11 +1,13 @@
-import gradio as gr
-import matplotlib.pyplot as plt
 import random
-from typing import List, Tuple, Optional
+import gradio as gr
+from typing import List
+import matplotlib.pyplot as plt
 
 from src.models.entities.player import Player
 from src.models.entities.game_configuration import GameConfiguration
+
 from src.models.enums.algorithm_type import AlgorithmType
+
 from src.simulation.simulation_engine import SimulationEngine
 
 

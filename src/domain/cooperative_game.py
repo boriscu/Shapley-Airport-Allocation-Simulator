@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
 from typing import List
+from abc import ABC, abstractmethod
+
 from src.models.entities.player import Player
 
 class CooperativeGame(ABC):

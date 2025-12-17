@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+
 from src.domain.cooperative_game import CooperativeGame
+
 from src.models.entities.calculation_result import CalculationResult
 
 class ShapleyCalculator(ABC):

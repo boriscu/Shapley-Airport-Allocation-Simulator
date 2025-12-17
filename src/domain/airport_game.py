@@ -1,6 +1,7 @@
 from typing import List
-from src.domain.cooperative_game import CooperativeGame
+
 from src.models.entities.player import Player
+from src.domain.cooperative_game import CooperativeGame
 
 class AirportGame(CooperativeGame):
     """

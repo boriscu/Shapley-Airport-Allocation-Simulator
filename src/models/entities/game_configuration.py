@@ -1,5 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
+
 from src.models.entities.player import Player
 from src.models.enums.algorithm_type import AlgorithmType
 

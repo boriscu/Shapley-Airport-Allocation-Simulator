@@ -1,8 +1,11 @@
 import time
 from typing import Dict
+
 from src.services.shapley_calculator_interface import ShapleyCalculator
-from src.models.entities.calculation_result import CalculationResult
+
 from src.models.enums.algorithm_type import AlgorithmType
+from src.models.entities.calculation_result import CalculationResult
+
 from src.domain.airport_game_coalition import AirportGameWithCoalitionConfiguration
 
 

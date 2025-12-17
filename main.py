@@ -2,7 +2,6 @@ import sys
 import os
 import argparse
 
-# Add the project root to the python path to ensure imports work correctly
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.ui.gradio_interface import GradioInterface
