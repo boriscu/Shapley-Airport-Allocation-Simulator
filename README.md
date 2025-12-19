@@ -1,5 +1,94 @@
 # Airport Runway Cost-Sharing Problem with Shapley Values
 
+## Installation
+
+### Prerequisites
+- Python 3.8 or higher
+- Conda (recommended for environment management)
+
+### Setting up the Environment
+
+1. Create a new Conda environment:
+   ```bash
+   conda create -n shappley python=3.10
+   ```
+
+2. Activate the environment:
+   ```bash
+   conda activate shappley
+   ```
+
+3. Install the required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Usage
+
+### Running the Web Interface
+
+To start the web application locally (accessible only from your machine):
+```bash
+python main.py
+```
+
+Then open your browser to: `http://localhost:7860`
+
+### Creating a Shareable Link
+
+To create a public sharing link that anyone can access:
+```bash
+python main.py --share
+```
+
+Gradio will generate a temporary public URL (valid for 72 hours) that you can share with others.
+
+### Custom Port
+
+To run on a different port:
+```bash
+python main.py --port 8080
+```
+
+### Using the Interface
+
+1. Set the **Number of Airlines** (2-10)
+2. Click **"🎲 Generate Random Airlines"** to create airlines with random runway requirements
+3. Select the **Algorithm** (exact or approximate)
+4. For approximate algorithm, adjust the **number of samples** (more = slower but more accurate)
+5. Click **"▶️ Run Simulation"** to calculate fair cost allocation
+6. View results showing:
+   - Runway length built
+   - Total construction cost
+   - Each airline's fair share (in dollars and percentage)
+   - Visualization bar chart
+
+### Running the Verification Script
+
+To verify the correctness of the implementation against known examples:
+```bash
+python tests/verify.py
+```
+
+### Running the Performance Benchmark
+
+To analyze the performance and scaling of the algorithms:
+```bash
+python tests/benchmark_performance.py
+```
+
+### Project Structure
+
+```
+├── src/             # Core application logic
+│   ├── domain/      # Game logic
+│   ├── infrastructure/
+│   ├── models/
+│   ├── services/
+│   ├── simulation/
+│   └── ui/          # Gradio interface
+└── tests/           # Verification and benchmark scripts
+```
 ## Overview
 
 This project implements a simulation of the **Airport Runway Cost-Sharing Problem**, a classic problem in cooperative game theory. The application demonstrates how to fairly distribute the cost of shared infrastructure among multiple stakeholders with different requirements.
@@ -118,90 +207,6 @@ For the Airport Problem, the Shapley value is known to be the **unique allocatio
 - **Interactive Visualization**: Bar charts showing cost allocation with dollar amounts
 - **Shareable Links**: Create public sharing links to demonstrate the simulation
 - **Extensible Design**: Built with inheritance, polymorphism, and design patterns (Factory, Singleton)
-
-## Installation
-
-### Prerequisites
-- Python 3.8 or higher
-- Conda (recommended for environment management)
-
-### Setting up the Environment
-
-1. Create a new Conda environment:
-   ```bash
-   conda create -n shappley python=3.10
-   ```
-
-2. Activate the environment:
-   ```bash
-   conda activate shappley
-   ```
-
-3. Install the required packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Usage
-
-### Running the Web Interface
-
-To start the web application locally (accessible only from your machine):
-```bash
-python main.py
-```
-
-Then open your browser to: `http://localhost:7860`
-
-### Creating a Shareable Link
-
-To create a public sharing link that anyone can access:
-```bash
-python main.py --share
-```
-
-Gradio will generate a temporary public URL (valid for 72 hours) that you can share with others.
-
-### Custom Port
-
-To run on a different port:
-```bash
-python main.py --port 8080
-```
-
-### Using the Interface
-
-1. Set the **Number of Airlines** (2-10)
-2. Click **"🎲 Generate Random Airlines"** to create airlines with random runway requirements
-3. Select the **Algorithm** (exact or approximate)
-4. For approximate algorithm, adjust the **number of samples** (more = slower but more accurate)
-5. Click **"▶️ Run Simulation"** to calculate fair cost allocation
-6. View results showing:
-   - Runway length built
-   - Total construction cost
-   - Each airline's fair share (in dollars and percentage)
-   - Visualization bar chart
-
-### Running the Verification Script
-
-To verify the correctness of the implementation against known examples:
-```bash
-python verify.py
-```
-
-## Project Structure
-
-```
-src/
-├── domain/          # Game logic (Airport Game implementation)
-├── infrastructure/  # Shared services (Logger, Config)
-├── models/          # Data structures
-│   ├── entities/    # Pydantic models (Player, Config, Result)
-│   └── enums/       # Enumerations (AlgorithmType)
-├── services/        # Shapley calculators (Exact, Approximate)
-├── simulation/      # Simulation orchestration
-└── ui/              # Web User Interface (Gradio)
-```
 
 ## Educational Value
 

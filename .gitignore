@@ -20,3 +20,6 @@ venv.bak/
 # IDE
 .vscode/
 .idea/
+
+pti.tex
+img/
