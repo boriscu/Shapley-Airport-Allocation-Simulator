@@ -42,8 +42,8 @@ class GradioInterface:
                     chosen = sorted(random.sample(airlines, k=k))
 
                     p = Player(
-                        id=f"P{i+1}",
-                        name=f"Movement {i+1}",
+                        id=f"F{i+1}",
+                        name=f"Flight {i+1}",
                         type=t,
                         airlines=frozenset(chosen),
                         cost=runway_steps[t - 1],
@@ -51,11 +51,11 @@ class GradioInterface:
                     self.players.append(p)
 
                     player_list.append(
-                        f"{p.name}: type={p.type}, airlines={','.join(chosen)}"
+                        f"{p.name}: Size Category {p.type}, Airlines: {', '.join(chosen)}"
                     )
-                    codeshare_lines.append(f"{p.id}: {','.join(chosen)}")
+                    codeshare_lines.append(f"{p.id}: {', '.join(chosen)}")
 
-                status = f"Generated {num_players} movements (paper model)."
+                status = f"✅ Generated {num_players} test flight operations with code-sharing alliances."
                 return (
                     status,
                     "\n".join(player_list),
@@ -123,7 +123,7 @@ class GradioInterface:
                     ]
                     if missing:
                         return (
-                            "ERROR: Missing airline mappings. Please fill 'Code-sharing' box or Regenerate.",
+                            "ERROR: Missing airline mappings. Please fill 'Airline Alliance Mapping' box or Regenerate.",
                             None,
                         )
 
@@ -152,9 +152,9 @@ class GradioInterface:
 
         lines = [
             "=" * 60,
-            "📊 SIMULATION RESULTS",
+            "SIMULATION RESULTS",
             "=" * 60,
-            f"\n Algorithm: {result.algorithm_used.value}",
+            f"\n Algorithm: {result.algorithm_used.value.replace('_', ' ').title()}",
             f" Runway Length Built: {result.total_cost:.0f} meters",
             f" Total Construction Cost: ${total_cost_dollars:,.0f}",
             f" Execution Time: {result.execution_time:.4f} seconds",
@@ -175,7 +175,7 @@ class GradioInterface:
         lines.append("\n" + "=" * 60)
         lines.append(f"✓ Total Allocated: ${total_allocated_dollars:,.0f}")
         lines.append(
-            f"✓ Verification: {'PASSED ✅' if abs(total_allocated - result.total_cost) < 0.01 else 'FAILED ❌'}"
+            f"✓ Verification: {'PASSED' if abs(total_allocated - result.total_cost) < 0.01 else 'FAILED'}"
         )
         lines.append("=" * 60)
 
@@ -265,6 +265,8 @@ class GradioInterface:
             gr.update(visible=show_samples),
             gr.update(visible=show_paper),
             gr.update(visible=show_paper),
+            #gr.update(visible=not show_paper),  # Hide standard summary if specialized boxes are shown
+            gr.update(visible=True),  # Keep summary visible as requested
         )
 
     def create_interface(self) -> gr.Blocks:
@@ -277,7 +279,7 @@ class GradioInterface:
         with gr.Blocks(title="Airport Cost-Sharing Game - Shapley Values") as interface:
             gr.Markdown(
                 """
-                # ✈️ Airport Runway Cost-Sharing Problem
+                # Airport Runway Cost-Sharing Problem
                 
                 ## The Problem
                 
@@ -336,10 +338,14 @@ class GradioInterface:
                     gr.Markdown("## Algorithm Settings")
 
                     algorithm_radio = gr.Radio(
-                        choices=["exact", "approximate", "configuration_value"],
+                        choices=[
+                            ("Exact (Standard Shapley)", "exact"),
+                            ("Approximate (Monte Carlo)", "approximate"),
+                            ("Code-Sharing (Configuration Value)", "configuration_value"),
+                        ],
                         value="exact",
-                        label="Algorithm Type",
-                        info="Exact/Approx: classic Shapley on runway-length game | Configuration Value: code-sharing",
+                        label="Coalition Model & Algorithm",
+                        info="Select 'Exact/Approximate' for standard cost-sharing or 'Code-Sharing' for networked airline alliances.",
                     )
 
                     samples_slider = gr.Slider(
@@ -353,20 +359,20 @@ class GradioInterface:
                     )
 
                     run_btn = gr.Button(
-                        "▶️ Run Simulation", variant="primary", size="lg"
+                        "Run Simulation", variant="primary", size="lg"
                     )
 
                     runway_steps_box = gr.Textbox(
-                        label="Runway Cost Steps c1..cT (meters)",
+                        label="Infrastructure Cost Segments (c1, c2, ...)",
                         lines=1,
-                        placeholder="Example: 1500, 2500, 3500",
+                        placeholder="Define costs for each plane size, e.g.: 1500, 2500, 3500",
                         visible=False,
                     )
 
                     codeshare_box = gr.Textbox(
-                        label="Code-sharing (movement -> airlines)",
+                        label="Airline Alliance Mapping (Code-Sharing)",
                         lines=6,
-                        placeholder="Example:\nP1: A1,A2\nP2: A1\nP3: A2,A3",
+                        placeholder="Format: FlightID: Airline1, Airline2...\nExample:\nP1: Delta, KLM\nP2: Air France\nP3: Delta, Air France",
                         visible=False,
                     )
 
@@ -401,6 +407,12 @@ class GradioInterface:
                 If a small airline only needs 1,500m but joins others building a 3,500m runway, 
                 they shouldn't pay half the cost - Shapley values ensure they pay proportionally 
                 to their actual need and contribution.
+
+                **Code-Sharing Extension (Configuration Value):**  
+                In modern aviation, flights are often operated by multiple airlines through alliances. 
+                This model extends the classical Shapley value to account for these "networked" 
+                relationships, ensuring cost allocation reflects the institutional structure 
+                of the industry.
                 """
             )
 
@@ -413,7 +425,7 @@ class GradioInterface:
             algorithm_radio.change(
                 fn=self.on_algorithm_change,
                 inputs=[algorithm_radio],
-                outputs=[samples_slider, runway_steps_box, codeshare_box],
+                outputs=[samples_slider, runway_steps_box, codeshare_box, players_display],
             )
 
             run_btn.click(
