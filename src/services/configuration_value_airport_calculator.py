@@ -11,8 +11,7 @@ from src.domain.airport_game_coalition import AirportGameWithCoalitionConfigurat
 
 class ConfigurationValueAirportCalculator(ShapleyCalculator):
     """
-    Computes the configuration value for airport games with coalition configuration (N,c,B)
-    using Theorem 4.1 (polynomial expression).
+    Computes the configuration value for airport games with coalition configuration (N,c,B).
     """
 
     def calculate(
